@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,9 +23,7 @@ import gdg.com.br.todolist.adapter.RecyclerViewAdapter;
 import gdg.com.br.todolist.model.ToDo;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
     private RecyclerView recyclerView;
-    private LinearLayoutManager linearLayoutManager;
     private RecyclerViewAdapter recyclerViewAdapter;
     private EditText addTaskBox;
     private DatabaseReference databaseReference;
@@ -40,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference();
         addTaskBox = (EditText) findViewById(R.id.add_task_box);
         recyclerView = (RecyclerView) findViewById(R.id.task_list);
-        linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAdapter = new RecyclerViewAdapter(allTask);
+        recyclerView.setAdapter(recyclerViewAdapter);
         Button addTaskButton = (Button) findViewById(R.id.add_task_button);
         addTaskButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,8 +88,9 @@ public class MainActivity extends AppCompatActivity {
         for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
             String taskTitle = singleSnapshot.getValue(String.class);
             allTask.add(new ToDo(taskTitle));
-            recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, allTask);
-            recyclerView.setAdapter(recyclerViewAdapter);
+
+            recyclerViewAdapter.notifyDataSetChanged();
+
         }
     }
 
@@ -103,10 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     allTask.remove(i);
                 }
             }
-            Log.d(TAG, "Task tile " + taskTitle);
             recyclerViewAdapter.notifyDataSetChanged();
-            recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, allTask);
-            recyclerView.setAdapter(recyclerViewAdapter);
         }
     }
 }
